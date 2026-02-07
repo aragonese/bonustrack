@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bonus Track — Il passaggio obbligato dell’amore</title>
+  <meta name="description" content="Ricevi la Bonus Track in automatico via email. Un testo per chi resta." />
+  <style>
+    :root { --bg:#f6f4ef; --txt:#141414; --muted:#5a5a5a; --card:#ffffff; --line:#e7e2d9; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--txt); }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 48px 20px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px; box-shadow: 0 6px 24px rgba(0,0,0,.04); }
+    h1 { font-size: 28px; margin: 0 0 12px; letter-spacing: .2px; }
+    p { line-height: 1.55; margin: 0 0 14px; color:var(--muted); }
+    .quote { color:var(--txt); font-size: 16px; margin-top: 18px; padding-left: 14px; border-left: 3px solid var(--line); }
+    form { margin-top: 18px; display:flex; gap:10px; flex-wrap:wrap; }
+    input[type="email"]{
+      flex: 1 1 260px; padding: 12px 14px; border-radius: 12px; border:1px solid var(--line);
+      font-size: 16px; outline: none;
+    }
+    button{
+      padding: 12px 16px; border-radius: 12px; border:1px solid #111; background:#111; color:#fff;
+      font-size: 16px; cursor:pointer;
+    }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    .fine { font-size: 13px; margin-top: 12px; color: #777; }
+    .fine a { color:#444; }
+    .top { margin-bottom:16px; font-size: 13px; letter-spacing:.16em; text-transform: uppercase; color:#777; }
+    .error { margin-top: 10px; color: #b00020; font-size: 14px; }
+    .ok { margin-top: 10px; color: #1b6b2a; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">Bonus Track</div>
+      <h1>Il passaggio obbligato dell’amore</h1>
+      <p>
+        Questo testo arriva <b>dopo</b> il libro. Non è un capitolo in più: è uno spazio.
+        Un approfondimento nudo su proiezione, bisogno e disillusione — e su ciò che può emergere quando resta solo la verità.
+      </p>
+
+      <p class="quote">
+        “Se stai leggendo questo bonus, significa che sei rimasto.
+        E questo testo è per chi resta.”
+      </p>
+
+      <form id="bonusForm">
+        <input id="email" type="email" name="email" placeholder="La tua email" required />
+        <button id="btn" type="submit">Ricevi la Bonus Track</button>
+      </form>
+
+      <div id="msg" class=""></div>
+
+      <div class="fine">
+        Nessuna promozione, solo questo testo. <br/>
+        Inviando l’email accetti di ricevere la Bonus Track. Puoi chiedere rimozione in qualsiasi momento.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('bonusForm');
+    const email = document.getElementById('email');
+    const btn = document.getElementById('btn');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = '';
+      msg.textContent = '';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/.netlify/functions/send-bonus-track', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ email: email.value.trim() })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) throw new Error(data.error || 'Errore. Riprova tra poco.');
+
+        msg.className = 'ok';
+        msg.textContent = 'Perfetto. Controlla la posta (anche Spam/Promozioni).';
+        setTimeout(() => window.location.href = '/thanks.html', 900);
+      } catch (err) {
+        msg.className = 'error';
+        msg.textContent = err.message || 'Errore. Riprova.';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
